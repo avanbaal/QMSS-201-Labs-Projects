@@ -1,0 +1,45 @@
+###########################################
+# Purpose: Final Project
+# Author: Andrew van Baal
+# Edit date: Dec 6, 2022
+# Data: FA22 State Data Set BLM
+###########################################
+
+library(readxl)
+library(janitor)
+library(package = "tidyverse")
+library(dplyr)
+library(car)
+
+finalprojectdata <- read_excel("Fall 22 State Data Set BLM-1.xlsx")
+View(finalprojectdata)
+
+summary(finalprojectdata$`OPP_BLM_%`)
+glimpse(finalprojectdata$`OPP_BLM_%`)
+
+var(x = finalprojectdata$`OPP_BLM_%`, na.rm = TRUE)
+sd(x = finalprojectdata$`OPP_BLM_%`, na.rm = TRUE)
+range(x = finalprojectdata$`OPP_BLM_%`, na.rm = TRUE)
+
+table(finalprojectdata$`Legislation opposing CRT active, inprocess as of 9/22`)
+
+#Step 4: Regressions
+
+lm1<- lm(finalprojectdata$`OPP_BLM_%` ~ `% 25 and older w/4 year college degree or higher` + `Median Income 2018` + `2019 per capita GDP` 
+         + `diversity index 2020` + `% Vote Trump 2020` + `ratio of % victims black/% population Black` + `Policing & Corrections Per Capita Spend`, data=finalprojectdata) # lm(y ~ x)
+summary(lm1)
+
+
+finalprojectdata$`Legislation opposing CRT active, inprocess as of 9/22`<- recode(finalprojectdata$`Legislation opposing CRT active, inprocess as of 9/22`, "'yes'=1; 'no'=0")
+lm2 <- lm(finalprojectdata$`Legislation opposing CRT active, inprocess as of 9/22` ~ `% 25 and older w/4 year college degree or higher` + `Median Income 2018` + `2019 per capita GDP` 
+          + `diversity index 2020` + `% Vote Trump 2020`, data=finalprojectdata)
+summary(lm2)
+
+glm1<- glm(finalprojectdata$`Legislation opposing CRT active, inprocess as of 9/22` ~ finalprojectdata$`% 25 and older w/4 year college degree or higher` + finalprojectdata$`Median Income 2018` + finalprojectdata$`2019 per capita GDP` 
+           + finalprojectdata$`diversity index 2020` + finalprojectdata$`% Vote Trump 2020`, family = binomial("logit"))
+summary(glm1)
+
+install.packages('odds.n.ends') # only have to install once
+library(odds.n.ends)
+odds.n.ends(glm1)
+  
