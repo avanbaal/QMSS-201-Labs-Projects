@@ -1,0 +1,94 @@
+# Lab 10
+# Author: Andrew van Baal
+# Data set: Lyrics and Tasks.csv
+
+#Step 1: Open dataset
+Lyrics.data <- read.csv(file.choose(), header = T)
+
+#Read in these packages
+library(package = "tidyverse")
+library(dplyr)
+library(janitor)
+
+#Using summary and glimpse to assess variable types
+summary(Lyrics.data)
+glimpse(Lyrics.data)
+
+#Recoding Condition, Gender, Year, LyricsOnly as Factors
+Lyrics.data.cleaned <- Lyrics.data %>%
+  mutate(Condition = as.factor(x = Condition))%>% 
+  mutate(Condition= recode(.x = Condition, "1" = "Complete song", "2" = "Instrumental-Only",
+                           "3" = "Audio of Lyrics", "4" = "Nothing"))%>%
+  mutate(Gender = as.factor(x = Gender))%>% 
+  mutate(Gender = recode(.x = Gender, "1" = "Male", "2" = "Female"))%>% 
+  mutate(Year = as.factor(x = Year))%>% 
+  mutate(Year = recode(.x = Year, "1" = "Freshman", "2" = "Sophomore",
+                       "3" = "Junior", "4" = "Senior"))%>% 
+  mutate(LyricsOnly = as.factor(x = LyricsOnly))%>% 
+  mutate(LyricsOnly = recode(.x = LyricsOnly, "1" = "Lyrics w/o Music", "2" = "Music w/o Lyrics")) %>%
+  select(Condition, Pieces, Gender, Year, LyricsOnly)
+
+#Creating Percent Variable
+Lyrics.data.cleaned$Percent <- ((Lyrics.data.cleaned$Pieces/25)*100)
+
+#Step 5: Running mean, median, variance, sd and range for pieces and percent
+mean(x = Lyrics.data.cleaned$Pieces, na.rm = TRUE)
+median(x = Lyrics.data.cleaned$Pieces, na.rm = TRUE)
+var(x = Lyrics.data.cleaned$Pieces, na.rm = TRUE)
+sd(x = Lyrics.data.cleaned$Pieces, na.rm = TRUE)
+range(x = Lyrics.data.cleaned$Pieces, na.rm = TRUE)
+
+mean(x = Lyrics.data.cleaned$Percent, na.rm = TRUE)
+median(x = Lyrics.data.cleaned$Percent, na.rm = TRUE)
+var(x = Lyrics.data.cleaned$Percent, na.rm = TRUE)
+sd(x = Lyrics.data.cleaned$Percent, na.rm = TRUE)
+range(x = Lyrics.data.cleaned$Percent, na.rm = TRUE)
+
+#Running freq distributions for Condition, Gender, Year, LyricsOnly
+library(descr)
+freq(x = Lyrics.data.cleaned$Condition, plot = FALSE)
+freq(x = Lyrics.data.cleaned$Gender, plot = FALSE)
+freq(x = Lyrics.data.cleaned$Year, plot = FALSE)
+freq(x = Lyrics.data.cleaned$LyricsOnly, plot = FALSE)
+
+#Looking at bivariate relationships
+  #Running means, sd of pieces by condition
+Lyrics.data.cleaned %>%                                        
+  group_by(Condition) %>%                         
+  summarise_at(vars(Pieces),             
+               list(name = mean))
+
+Lyrics.data.cleaned %>%                                        
+  group_by(Condition) %>%                         
+  summarise_at(vars(Pieces),             
+               list(St.Dev = sd)) 
+  #Running the anova
+PiecesbyConditionaov <- aov(Pieces ~ Condition, data = Lyrics.data.cleaned)
+summary(PiecesbyConditionaov)
+
+  #Running means, sd by lyricsonly
+Lyrics.data.cleaned %>%                                        
+  group_by(LyricsOnly) %>%                         
+  summarise_at(vars(Pieces),             
+               list(name = mean))
+
+Lyrics.data.cleaned %>%                                        
+  group_by(LyricsOnly) %>%                         
+  summarise_at(vars(Pieces),             
+               list(St.Dev = sd)) 
+  #running t-test
+TTESTPIECESLYRICSONLY <- t.test(formula = Lyrics.data.cleaned$Pieces ~
+                        Lyrics.data.cleaned$LyricsOnly)
+TTESTPIECESLYRICSONLY
+
+  #running crosstab for sex by condition
+
+source("http://pcwww.liv.ac.uk/~william/R/crosstab.r")
+crosstab(Lyrics.data.cleaned, row.vars = "Condition", col.vars = "Gender", type = "c")
+
+  #running crosstab for year by condition
+source("http://pcwww.liv.ac.uk/~william/R/crosstab.r")
+crosstab(Lyrics.data.cleaned, row.vars = "Condition", col.vars = "Year", type = "c")
+
+
+  
